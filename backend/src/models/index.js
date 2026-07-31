@@ -4,11 +4,24 @@ const config = require('../config/database');
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = config[env];
 
-const sequelize = new Sequelize({
-  dialect: dbConfig.dialect,
-  storage: dbConfig.storage,
-  logging: dbConfig.logging
-});
+let sequelize;
+if (process.env.DATABASE_URL) {
+  // Producción con PostgreSQL
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: { require: true, rejectUnauthorized: false }
+    },
+    logging: false
+  });
+} else {
+  // Desarrollo con SQLite
+  sequelize = new Sequelize({
+    dialect: dbConfig.dialect,
+    storage: dbConfig.storage,
+    logging: dbConfig.logging
+  });
+}
 
 // Importar modelos
 const User = require('./User')(sequelize);
