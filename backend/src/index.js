@@ -40,11 +40,9 @@ async function start() {
     await sequelize.authenticate();
     console.log('Conexión a base de datos establecida.');
     
-    // Sincronizar modelos (en desarrollo)
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync();
-      console.log('Modelos sincronizados.');
-    }
+    // Sincronizar modelos (crear tablas si no existen)
+    await sequelize.sync();
+    console.log('Modelos sincronizados.');
 
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en puerto ${PORT}`);
