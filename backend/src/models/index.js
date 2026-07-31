@@ -1,12 +1,10 @@
 const { Sequelize } = require('sequelize');
-const config = require('../config/database');
-
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
+const path = require('path');
 
 let sequelize;
+
 if (process.env.DATABASE_URL) {
-  // Producción con PostgreSQL
+  // Producción: PostgreSQL (Neon/Render)
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     dialectOptions: {
@@ -15,11 +13,11 @@ if (process.env.DATABASE_URL) {
     logging: false
   });
 } else {
-  // Desarrollo con SQLite
+  // Desarrollo local: SQLite
   sequelize = new Sequelize({
-    dialect: dbConfig.dialect,
-    storage: dbConfig.storage,
-    logging: dbConfig.logging
+    dialect: 'sqlite',
+    storage: path.join(__dirname, '..', '..', 'database.sqlite'),
+    logging: false
   });
 }
 
