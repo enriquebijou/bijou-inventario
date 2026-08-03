@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, TextField, Autocomplete, Card, CardContent,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Chip, Grid
+  Paper, Chip, Grid, Button
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
+import { PictureAsPdf } from '@mui/icons-material';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { formatMoney, formatNumber } from '../utils/format';
@@ -13,9 +13,15 @@ export default function Kardex() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [kardexData, setKardexData] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     loadProducts();
+    // Fechas por defecto: mes actual
+    const now = new Date();
+    setStartDate(new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]);
+    setEndDate(now.toISOString().split('T')[0]);
   }, []);
 
   const loadProducts = async () => {
@@ -29,7 +35,11 @@ export default function Kardex() {
 
   const loadKardex = async (productId) => {
     try {
-      const { data } = await api.get(`/kardex/${productId}`);
+      let url = `/kardex/${productId}`;
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+      const { data } = await api.get(url);
       setKardexData(data);
     } catch (error) {
       toast.error('Error al cargar kardex');
@@ -42,6 +52,35 @@ export default function Kardex() {
       loadKardex(product.id);
     } else {
       setKardexData(null);
+    }
+  };
+
+  const handleFilter = () => {
+    if (selectedProduct) {
+      loadKardex(selectedProduct.id);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    if (!selectedProduct) return;
+    try {
+      let url = `/kardex/${selectedProduct.id}/pdf`;
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+      const response = await api.get(url, { responseType: 'blob' });
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `kardex_${selectedProduct.name.replace(/\s/g, '_')}_${startDate}_${endDate}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+      toast.success('PDF exportado');
+    } catch (error) {
+      toast.error('Error al generar PDF');
     }
   };
 
@@ -60,20 +99,55 @@ export default function Kardex() {
         Kardex de Producto
       </Typography>
 
-      {/* Selector de producto */}
+      {/* Selector de producto y filtros */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Selecciona un producto para ver su historial de movimientos de inventario.
+            Selecciona un producto y rango de fechas para ver su historial de movimientos.
           </Typography>
-          <Autocomplete
-            options={products}
-            getOptionLabel={(option) => `${option.name} | ${option.barcode}`}
-            onChange={(_, product) => handleSelectProduct(product)}
-            renderInput={(params) => (
-              <TextField {...params} label="Buscar producto por nombre o código" />
-            )}
-          />
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={4}>
+              <Autocomplete
+                options={products}
+                getOptionLabel={(option) => `${option.name} | ${option.barcode}`}
+                onChange={(_, product) => handleSelectProduct(product)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Buscar producto" size="small" />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} sm={2.5}>
+              <TextField
+                fullWidth type="date" label="Desde" size="small"
+                InputLabelProps={{ shrink: true }}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={2.5}>
+              <TextField
+                fullWidth type="date" label="Hasta" size="small"
+                InputLabelProps={{ shrink: true }}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={6} sm={1.5}>
+              <Button variant="contained" fullWidth onClick={handleFilter} disabled={!selectedProduct}>
+                Filtrar
+              </Button>
+            </Grid>
+            <Grid item xs={6} sm={1.5}>
+              <Button
+                variant="outlined" color="error" fullWidth
+                startIcon={<PictureAsPdf />}
+                onClick={handleExportPDF}
+                disabled={!kardexData}
+              >
+                PDF
+              </Button>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -155,7 +229,7 @@ export default function Kardex() {
                 {kardexData.movements.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                      No hay movimientos registrados para este producto
+                      No hay movimientos en este rango de fechas
                     </TableCell>
                   </TableRow>
                 )}
