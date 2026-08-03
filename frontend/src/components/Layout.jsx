@@ -8,7 +8,8 @@ import {
 import {
   Menu as MenuIcon, Dashboard, Inventory, PointOfSale, Receipt,
   Category, Discount, QrCode, Person, ShoppingCart, Settings,
-  Assessment, ExpandLess, ExpandMore, BarChart, Summarize, People, Lock
+  Assessment, ExpandLess, ExpandMore, BarChart, Summarize, People, Lock,
+  AccountBalance, ListAlt
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -37,7 +38,9 @@ export default function Layout() {
     { text: 'Productos', icon: <Inventory />, path: '/products', roles: ['admin', 'almacenero'] },
     { text: 'Nueva Venta', icon: <PointOfSale />, path: '/sales', roles: ['admin', 'vendedor'] },
     { text: 'Facturas', icon: <Receipt />, path: '/invoices', roles: ['admin', 'vendedor'] },
+    { text: 'Caja', icon: <AccountBalance />, path: '/cash', roles: ['admin', 'vendedor'] },
     { text: 'Compras', icon: <ShoppingCart />, path: '/purchases', roles: ['admin', 'almacenero'] },
+    { text: 'Kardex', icon: <ListAlt />, path: '/kardex', roles: ['admin', 'almacenero'] },
     { text: 'Categorías', icon: <Category />, path: '/categories', roles: ['admin'] },
     { text: 'Descuentos', icon: <Discount />, path: '/discounts', roles: ['admin'] },
     { text: 'Etiquetas', icon: <QrCode />, path: '/labels', roles: ['admin', 'almacenero'] },

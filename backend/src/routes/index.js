@@ -8,6 +8,8 @@ const labelRoutes = require('./labels');
 const purchaseRoutes = require('./purchases');
 const settingsRoutes = require('./settings');
 const reportRoutes = require('./reports');
+const kardexRoutes = require('./kardex');
+const cashRoutes = require('./cash');
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use('/labels', labelRoutes);
 router.use('/purchases', purchaseRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/reports', reportRoutes);
+router.use('/kardex', kardexRoutes);
+router.use('/cash', cashRoutes);
 
 module.exports = router;

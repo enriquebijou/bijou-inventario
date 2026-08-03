@@ -33,6 +33,8 @@ const InventoryMovement = require('./InventoryMovement')(sequelize);
 const Purchase = require('./Purchase')(sequelize);
 const PurchaseDetail = require('./PurchaseDetail')(sequelize);
 const StoreSettings = require('./StoreSettings')(sequelize);
+const CashRegister = require('./CashRegister')(sequelize);
+const CashMovement = require('./CashMovement')(sequelize);
 
 // Relaciones
 
@@ -78,6 +80,17 @@ PurchaseDetail.belongsTo(Purchase, { foreignKey: 'purchaseId' });
 Product.hasMany(PurchaseDetail, { foreignKey: 'productId' });
 PurchaseDetail.belongsTo(Product, { foreignKey: 'productId' });
 
+// Caja
+User.hasMany(CashRegister, { foreignKey: 'openedBy', as: 'openedRegisters' });
+CashRegister.belongsTo(User, { foreignKey: 'openedBy', as: 'openedByUser' });
+CashRegister.belongsTo(User, { foreignKey: 'closedBy', as: 'closedByUser' });
+
+CashRegister.hasMany(CashMovement, { foreignKey: 'cashRegisterId', as: 'movements' });
+CashMovement.belongsTo(CashRegister, { foreignKey: 'cashRegisterId' });
+
+User.hasMany(CashMovement, { foreignKey: 'userId' });
+CashMovement.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   sequelize,
   Sequelize,
@@ -91,5 +104,7 @@ module.exports = {
   InventoryMovement,
   Purchase,
   PurchaseDetail,
-  StoreSettings
+  StoreSettings,
+  CashRegister,
+  CashMovement
 };

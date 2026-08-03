@@ -1,5 +1,6 @@
 const { Invoice, InvoiceDetail, Product, CustomerType, DiscountType, InventoryMovement, User, sequelize, Sequelize } = require('../models');
 const { Op } = Sequelize;
+const { registerSale } = require('./cashController');
 
 // Generar número de factura
 async function generateInvoiceNumber() {
@@ -197,6 +198,9 @@ const create = async (req, res) => {
         }
       ]
     });
+
+    // Registrar venta en caja si hay una abierta
+    await registerSale(total, req.user.id, invoice.id);
 
     res.status(201).json(fullInvoice);
   } catch (error) {

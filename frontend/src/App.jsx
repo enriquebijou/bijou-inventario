@@ -19,6 +19,8 @@ import ReportInventory from './pages/ReportInventory';
 import ReportSales from './pages/ReportSales';
 import Users from './pages/Users';
 import ChangePassword from './pages/ChangePassword';
+import Kardex from './pages/Kardex';
+import CashRegister from './pages/CashRegister';
 import { CircularProgress, Box } from '@mui/material';
 
 function PrivateRoute({ children }) {
@@ -67,6 +69,8 @@ export default function App() {
         <Route path="change-password" element={<ChangePassword />} />
         <Route path="reports/inventory" element={<ReportInventory />} />
         <Route path="reports/sales" element={<ReportSales />} />
+        <Route path="kardex" element={<Kardex />} />
+        <Route path="cash" element={<CashRegister />} />
       </Route>
     </Routes>
   );
